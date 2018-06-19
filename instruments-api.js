@@ -3,7 +3,7 @@ const express = require("express")
 const app = express()
 const port = process.env.PORT || 5000
 const bodyParser = require("body-parser")
-const { getInstrument, addInstrument } = require("./dal")
+const { getInstrument, addInstrument, deleteInstrument } = require("./dal")
 const NodeHTTPError = require("node-http-error")
 const { propOr, isEmpty, not } = require("ramda")
 const checkRequiredFields = require("./lib/check-required-fields")
@@ -47,7 +47,6 @@ app.post("/instruments", function(req, res, next) {
 		next(new NodeHTTPError(400, ` ${createMissingFieldMsg(missingFields)}`))
 	}
 
-	// TODO: Pick required
 	const cleanedInstrument = cleanObj(requiredFields, newInstrument)
 
 	addInstrument(newInstrument, function(err, data) {
@@ -57,6 +56,17 @@ app.post("/instruments", function(req, res, next) {
 			)
 		}
 		res.status(201).send(data)
+	})
+})
+
+app.delete("/instruments/:instrumentID", function(req, res, next) {
+	const instrumentID = req.params.instrumentID
+	deleteInstrument(instrumentID, function(err, data) {
+		if (err) {
+			next(new NodeHTTPError(err.status, err.message, err))
+			return
+		}
+		res.status(200).send(data)
 	})
 })
 
